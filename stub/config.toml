@@ -1,0 +1,16 @@
+# default connection name
+default = "redis"
+
+# 1. if `masterName` is not empty, a failover connection will be created
+# 2. if the number of addresses is two or more, a cluster connection will be created
+# 3. otherwise, a single-node connection will be created 
+# For more details: https://redis.uptrace.dev/guide/go-redis.html
+[connections.redis]
+masterName = ""
+addresses = ["localhost:6379"]
+clientName = ""
+database = 0 # only works for single-node connection and failover connection
+username = ""
+password = ""
+sentinelUsername = ""
+sentinelPassword = ""
