@@ -1,9 +1,10 @@
 package redis
 
 import (
+	"sync"
+
 	"github.com/gopi-frame/collection/kv"
 	"github.com/gopi-frame/contract/redis"
-	"sync"
 )
 
 type RedisManager struct {
@@ -23,15 +24,9 @@ func NewRedisManager() *RedisManager {
 
 func (m *RedisManager) SetDefaultConnection(name string) {
 	m.defaultConnection = name
-}
-
-func (m *RedisManager) Use(client redis.Client) *RedisManager {
 	m.once.Do(func() {
-		if m.Client == nil {
-			m.Client = client
-		}
+		m.Client = m.GetConnection(name)
 	})
-	return m
 }
 
 func (m *RedisManager) AddConnection(name string, client redis.Client) {
@@ -65,7 +60,7 @@ func (m *RedisManager) HasConnection(name string) bool {
 	return false
 }
 
-func (m *RedisManager) TryConnection(name string) (redis.Client, error) {
+func (m *RedisManager) TryGetConnection(name string) (redis.Client, error) {
 	m.connections.RLock()
 	if conn, ok := m.connections.Get(name); ok {
 		m.connections.RUnlock()
@@ -88,8 +83,8 @@ func (m *RedisManager) TryConnection(name string) (redis.Client, error) {
 	return nil, NewConnectionNotConfiguredException(name)
 }
 
-func (m *RedisManager) Connection(name string) redis.Client {
-	if conn, err := m.TryConnection(name); err != nil {
+func (m *RedisManager) GetConnection(name string) redis.Client {
+	if conn, err := m.TryGetConnection(name); err != nil {
 		panic(err)
 	} else {
 		return conn
@@ -97,8 +92,8 @@ func (m *RedisManager) Connection(name string) redis.Client {
 }
 
 func (m *RedisManager) ConnectionOrDefault(name string) redis.Client {
-	if conn, err := m.TryConnection(name); err != nil {
-		return m.Connection(m.defaultConnection)
+	if conn, err := m.TryGetConnection(name); err != nil {
+		return m.GetConnection(m.defaultConnection)
 	} else {
 		return conn
 	}

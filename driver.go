@@ -6,14 +6,10 @@ package redis
 
 import (
 	"fmt"
+
 	"github.com/gopi-frame/collection/kv"
 	rediscontract "github.com/gopi-frame/contract/redis"
 	"github.com/gopi-frame/exception"
-
-	_ "github.com/gopi-frame/redis/driver/cluster"
-	_ "github.com/gopi-frame/redis/driver/ring"
-	_ "github.com/gopi-frame/redis/driver/sentinel"
-	_ "github.com/gopi-frame/redis/driver/standalone"
 )
 
 var drivers = kv.NewMap[string, rediscontract.Driver]()
